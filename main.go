@@ -60,6 +60,8 @@ func main() {
 		Collection: collection,
 	})
 
+	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 	server := &http.Server{
 		Addr: ":4500",
 	}

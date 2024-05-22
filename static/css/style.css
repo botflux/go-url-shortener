@@ -1,0 +1,44 @@
+:root {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+}
+
+form {
+    display: flex;
+    justify-content: center;
+}
+
+input {
+    padding: .4rem .8rem;
+    margin: 0;
+    min-width: 20vw;
+    border-width: 2px;
+    border-right-width: 0;
+    border-color: lightgrey;
+    border-style: solid;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    font-size: 1rem;
+}
+
+button {
+    margin: 0;
+    border-width: 2px;
+    border-left-width: 0;
+    border-color: lightgrey;
+    border-style: solid;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: .1rem;
+}
+
+button:hover {
+    cursor: pointer;
+}

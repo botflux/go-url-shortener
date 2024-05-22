@@ -4,20 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL shortener</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <h1>URL Shortener</h1>
+    <main>
+        <div class="centered">
+            <h1>URL Shortener</h1>
+        </div>
 
-    {{ if eq .ShortenUrl nil }}
-        <form action="/" method="post">
-            <input type="text" name="url">
-            <button type="submit">Create</button>
-        </form>
-    {{ else }}
-        <a href="/r/{{ .ShortenUrl }}">
-            Here is your shorten URL
-        </a>
-    {{ end }}
-
+        <div class="centered">
+            {{ if eq .ShortenUrl nil }}
+                <form action="/" method="post">
+                    <input type="text" name="url">
+                    <button type="submit">Create</button>
+                </form>
+            {{ else }}
+                <a href="/r/{{ .ShortenUrl }}">
+                    Here is your shorten URL
+                </a>
+            {{ end }}
+        </div>
+    
+    </main>
 </body>
 </html>
