@@ -1,4 +1,4 @@
-package main
+package types
 
 type UrlMappingDocument struct {
 	ShortenUrl  string

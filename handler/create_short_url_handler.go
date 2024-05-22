@@ -1,11 +1,15 @@
-package main
+package handler
 
 import (
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"go-url-shortener/types"
 )
 
 type CreateShortURLHandler struct {
@@ -22,7 +26,7 @@ func (handler *CreateShortURLHandler) ServeHTTP(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	urlMapping := UrlMappingDocument{
+	urlMapping := types.UrlMappingDocument{
 		ShortenUrl:  RandomId(5),
 		CompleteUrl: urlToShorten,
 	}
@@ -37,4 +41,20 @@ func (handler *CreateShortURLHandler) ServeHTTP(w http.ResponseWriter, r *http.R
 
 	w.WriteHeader(http.StatusCreated)
 	handler.HomepageTemplate.Execute(w, urlMapping)
+}
+
+var letters = [...]string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
+
+func RandomId(length int) string {
+	var sb strings.Builder
+
+	for i := 0; i < length; i++ {
+		index := rand.Intn(25)
+
+		sb.WriteString(
+			letters[index],
+		)
+	}
+
+	return sb.String()
 }

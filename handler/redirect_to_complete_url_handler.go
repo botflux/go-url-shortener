@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"go-url-shortener/types"
 )
 
 type RedirectToCompleteURLHandler struct {
@@ -21,7 +23,7 @@ func (handler *RedirectToCompleteURLHandler) ServeHTTP(w http.ResponseWriter, r 
 		return
 	}
 
-	var mapping UrlMappingDocument
+	var mapping types.UrlMappingDocument
 
 	err := handler.Collection.FindOne(r.Context(), bson.D{{Key: "shortenurl", Value: id}}).Decode(&mapping)
 

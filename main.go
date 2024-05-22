@@ -2,20 +2,21 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"html/template"
 	"os"
-	"strings"
 
 	"log"
 
-	"math/rand"
 	"net/http"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"go-url-shortener/handler"
 )
 
 func main() {
@@ -23,23 +24,13 @@ func main() {
 		log.Println("No .env file found")
 	}
 
-	uri := os.Getenv("MONGODB_URI")
-
-	if uri == "" {
-		log.Fatal("Set the 'MONGODB_URI' environment variable to start the application")
-	}
-
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	client, err := CreateMongoClientFromEnvs()
 
 	if err != nil {
-		log.Fatalln("Cannot connect to MongoDB using the connection string passed by environment variable", err)
+		log.Fatalln("Cannot create the MongoDB client", err)
 	}
 
-	defer func() {
-		if err := client.Disconnect(context.TODO()); err != nil {
-			log.Fatalln("Something went wrong while disconnecting from MongoDB", err)
-		}
-	}()
+	defer DisconnectMongoClient(client)
 
 	collection := client.Database("url_shortener").Collection("url_mapping")
 
@@ -56,16 +47,16 @@ func main() {
 
 	indexTemplate := template.Must(template.ParseFiles("templates/index.tmpl.html"))
 
-	http.Handle("GET /", &HomepageHandler{
+	http.Handle("GET /", &handler.HomepageHandler{
 		HomepageTemplate: indexTemplate,
 	})
 
-	http.Handle("POST /", &CreateShortURLHandler{
+	http.Handle("POST /", &handler.CreateShortURLHandler{
 		Collection:       collection,
 		HomepageTemplate: indexTemplate,
 	})
 
-	http.Handle("GET /r/{id}", &RedirectToCompleteURLHandler{
+	http.Handle("GET /r/{id}", &handler.RedirectToCompleteURLHandler{
 		Collection: collection,
 	})
 
@@ -76,18 +67,24 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-var letters = [...]string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
+func CreateMongoClientFromEnvs() (*mongo.Client, error) {
+	uri := os.Getenv("MONGODB_URI")
 
-func RandomId(length int) string {
-	var sb strings.Builder
-
-	for i := 0; i < length; i++ {
-		index := rand.Intn(25)
-
-		sb.WriteString(
-			letters[index],
-		)
+	if uri == "" {
+		return nil, errors.New("Set the 'MONGODB_URI' environment variable to start the application")
 	}
 
-	return sb.String()
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+func DisconnectMongoClient(client *mongo.Client) {
+	if err := client.Disconnect(context.TODO()); err != nil {
+		log.Fatalln("Something went wrong while disconnecting from MongoDB", err)
+	}
 }
