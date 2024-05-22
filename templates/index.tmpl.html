@@ -8,15 +8,14 @@
 <body>
     <h1>URL Shortener</h1>
 
-    {{ if eq .shortenUrl nil }}
+    {{ if eq .ShortenUrl nil }}
         <form action="/" method="post">
             <input type="text" name="url">
             <button type="submit">Create</button>
         </form>
     {{ else }}
-        <a href="{{ .shortenUrl }}">
+        <a href="/r/{{ .ShortenUrl }}">
             Here is your shorten URL
-            
         </a>
     {{ end }}
 
