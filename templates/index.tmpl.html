@@ -14,18 +14,19 @@
         </div>
 
         <div class="centered">
-            {{ if eq .ShortenUrl nil }}
-                <form action="/" method="post">
-                    <input type="text" name="url">
+            <form action="/" method="post">
+                <input type="text" id="input" name="url" value="{{ if ne .ShortenUrl nil }}http://localhost:4500/r/{{.ShortenUrl}}{{end}}" {{ if ne .ShortenUrl nil }}disabled{{ end }}>
+                
+                {{ if eq .ShortenUrl nil }}
                     <button type="submit">Create</button>
-                </form>
-            {{ else }}
-                <a href="/r/{{ .ShortenUrl }}">
-                    Here is your shorten URL
-                </a>
-            {{ end }}
+                {{ else }}
+                    <button type="button" data-copy-element="#input" data-copy-prop="value">Copy</button>
+                {{ end }}
+            </form>
         </div>
     
     </main>
+
+    <script src="/static/js/script.js"></script>
 </body>
 </html>

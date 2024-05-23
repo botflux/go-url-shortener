@@ -39,8 +39,8 @@ func (handler *CreateShortURLHandler) ServeHTTP(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	handler.HomepageTemplate.Execute(w, urlMapping)
+	w.Header().Add("Location", fmt.Sprintf("/shorten/%s", urlMapping.ShortenUrl))
+	w.WriteHeader(http.StatusFound)
 }
 
 var letters = [...]string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}

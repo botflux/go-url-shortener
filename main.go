@@ -56,6 +56,11 @@ func main() {
 		HomepageTemplate: indexTemplate,
 	})
 
+	http.Handle("GET /shorten/{id}", &handler.DisplayShortenUrlHandler{
+		Collection:       collection,
+		HomepageTemplate: indexTemplate,
+	})
+
 	http.Handle("GET /r/{id}", &handler.RedirectToCompleteURLHandler{
 		Collection: collection,
 	})
