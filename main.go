@@ -15,27 +15,38 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 
 	"go-url-shortener/handler"
 )
 
 func main() {
+	logger, err := zap.NewProduction()
+
+	if err != nil {
+		log.Fatalln("Cannot create the logger", err)
+	}
+
+	defer logger.Sync()
+
+	logger.Info("App is starting up!")
+
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		logger.Info("No .env file found")
 	}
 
 	client, err := CreateMongoClientFromEnvs()
 
 	if err != nil {
-		log.Fatalln("Cannot create the MongoDB client", err)
+		logger.Panic("Cannot create the MongoDB client", zap.Error(err))
 	}
 
 	defer DisconnectMongoClient(client)
 
-	collection, err := GetCollectionAndCreateIndices(client)
+	collection, err := GetCollectionAndCreateIndices(client, logger)
 
 	if err != nil {
-		log.Fatalln("Cannot get the collection or create the indices", err)
+		logger.Panic("Cannot get the collection or create the indices", zap.Error(err))
 	}
 
 	indexTemplate := template.Must(template.ParseFiles("templates/index.tmpl.html"))
@@ -64,7 +75,9 @@ func main() {
 		Addr: ":4500",
 	}
 
-	log.Fatal(server.ListenAndServe())
+	if err := server.ListenAndServe(); err != nil {
+		logger.Panic("HTTP server stopped", zap.Error(err))
+	}
 }
 
 func CreateMongoClientFromEnvs() (*mongo.Client, error) {
@@ -89,7 +102,7 @@ func DisconnectMongoClient(client *mongo.Client) {
 	}
 }
 
-func GetCollectionAndCreateIndices(client *mongo.Client) (*mongo.Collection, error) {
+func GetCollectionAndCreateIndices(client *mongo.Client, logger *zap.Logger) (*mongo.Collection, error) {
 	collection := client.Database("url_shortener").Collection("url_mapping")
 
 	name, err := collection.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
@@ -101,7 +114,7 @@ func GetCollectionAndCreateIndices(client *mongo.Client) (*mongo.Collection, err
 		return nil, err
 	}
 
-	fmt.Printf("Index successfully created with name '%s'\n", name)
+	logger.Info(fmt.Sprintf("Index successfully created with name '%s'", name))
 
 	return collection, nil
 }
