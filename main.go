@@ -32,18 +32,11 @@ func main() {
 
 	defer DisconnectMongoClient(client)
 
-	collection := client.Database("url_shortener").Collection("url_mapping")
-
-	name, err := collection.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
-		Keys:    bson.D{{Key: "shortenurl", Value: 1}},
-		Options: options.Index().SetUnique(true).SetExpireAfterSeconds(60),
-	})
+	collection, err := GetCollectionAndCreateIndices(client)
 
 	if err != nil {
-		log.Fatalln("Cannot create indexes on the MongoDB collection", err)
+		log.Fatalln("Cannot get the collection or create the indices", err)
 	}
-
-	fmt.Printf("Index successfully created with name '%s'\n", name)
 
 	indexTemplate := template.Must(template.ParseFiles("templates/index.tmpl.html"))
 
@@ -94,4 +87,21 @@ func DisconnectMongoClient(client *mongo.Client) {
 	if err := client.Disconnect(context.TODO()); err != nil {
 		log.Fatalln("Something went wrong while disconnecting from MongoDB", err)
 	}
+}
+
+func GetCollectionAndCreateIndices(client *mongo.Client) (*mongo.Collection, error) {
+	collection := client.Database("url_shortener").Collection("url_mapping")
+
+	name, err := collection.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys:    bson.D{{Key: "shortenurl", Value: 1}},
+		Options: options.Index().SetUnique(true).SetExpireAfterSeconds(60),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Index successfully created with name '%s'\n", name)
+
+	return collection, nil
 }
